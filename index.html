@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SkinTone Predictor</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f0f0f0; color: #333; text-align: center; padding: 50px; }
+    .container { background: #fff; padding: 20px; border-radius: 8px; max-width: 500px; margin: 0 auto; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    h1 { margin-bottom: 1rem; }
+    input[type=file] { margin: 1rem 0; }
+    button { padding: 10px 20px; border: none; background: #007bff; color: #fff; border-radius: 4px; cursor: pointer; }
+    button:hover { background: #0056b3; }
+    #result { margin-top: 20px; font-size: 1.2rem; }
+    #result span { font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>SkinTone Predictor</h1>
+    <p>Upload a photo to predict the skin tone class.</p>
+    <input type="file" id="fileInput" accept="image/*" />
+    <br />
+    <button id="predictBtn">Predict</button>
+    <div id="result"></div>
+  </div>
+
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const predictBtn = document.getElementById('predictBtn');
+    const resultDiv = document.getElementById('result');
+
+    predictBtn.addEventListener('click', () => {
+      const file = fileInput.files[0];
+      if (!file) {
+        alert('Please select an image file.');
+        return;
+      }
+      const formData = new FormData();
+      formData.append('file', file);
+
+      resultDiv.textContent = 'Predicting...';
+
+      fetch('/predict', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.error) {
+          resultDiv.innerHTML = `<span style="color: red;">${data.error}</span>`;
+        } else {
+          resultDiv.innerHTML = `SkinTone: <span>${data.skintone}</span><br/>Confidence: <span>${data.confidence}</span>`;
+        }
+      })
+      .catch(err => {
+        resultDiv.innerHTML = `<span style="color: red;">Error: ${err.message}</span>`;
+      });
+    });
+  </script>
+</body>
+</html>
